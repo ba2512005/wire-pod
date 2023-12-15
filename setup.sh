@@ -135,12 +135,12 @@ function getSTT() {
         echo "Which speech-to-text service would you like to use?"
         echo "1: Coqui (local, no usage collection, less accurate, a little slower)"
         echo "2: Picovoice Leopard (local, usage collected, accurate, account signup required)"
-        echo "3: VOSK (local, accurate, multilanguage, fast, recommended)"
-        # echo "4: Whisper (local, accurate, multilanguage, a little slower, recommended for more powerful hardware)"
+        echo "3: VOSK (local, inaccurate, multilanguage, fast)"
+        echo "4: Whisper (local, accurate, multilanguage, a little slower, recommended for more powerful hardware)"
         echo
-        read -p "Enter a number (3): " sttServiceNum
+        read -p "Enter a number (4): " sttServiceNum
         if [[ ! -n ${sttServiceNum} ]]; then
-            sttService="vosk"
+            sttService="whisper"
         elif [[ ${sttServiceNum} == "1" ]]; then
             if [[ ${TARGET} == "darwin" ]]; then
                 echo "Coqui is not supported for macOS. Please select another option."
@@ -152,8 +152,8 @@ function getSTT() {
             sttService="leopard"
         elif [[ ${sttServiceNum} == "3" ]]; then
             sttService="vosk"
-        # elif [[ ${sttServiceNum} == "4" ]]; then
-        #     sttService="whisper"
+        elif [[ ${sttServiceNum} == "4" ]]; then
+            sttService="whisper"
         else
             echo
             echo "Choose a valid number, or just press enter to use the default number."
@@ -166,7 +166,62 @@ function getSTT() {
     else
         sttServicePrompt
     fi
-    if [[ ${sttService} == "leopard" ]]; then
+#    if [[ ${sttService} == "whisper" ]]; then
+#        function whisperSttModelPrompt() {
+#
+#            echo
+#            echo "export STT_SERVICE=whisper" >> ./chipper/source.sh
+#            echo "Which Whisper voice model would you like to use? (Whisper-medium)"
+#            echo "Model name | Parameters | Required VRAM | Relative speed"
+#            echo "1: Tiny       39M         ~1GB           ~32x"
+#            echo "2: Base       74M         ~1GB           ~16x"
+#            echo "3: Small      244M        ~2GB           ~6x"
+#            echo "4: Medium     769M        ~5GB           ~2x"
+#            echo "5: Large      1470.13M    ~10GB          1x"
+#            echo
+#            read -p "Enter a number (1-5): " sttModelNum
+#            if [[ ! -n ${sttModelNum} ]]; then
+#                sttModel="openai/whisper-medium"
+#            elif [[ ${sttModelNum} == "1" ]]; then
+#                sttModel="openai/whisper-tiny"
+#            elif [[ ${sttModelNum} == "2" ]]; then
+#                sttModel="openai/whisper-base"
+#            elif [[ ${sttModelNum} == "3" ]]; then
+#                sttModel="openai/whisper-small"
+#            elif [[ ${sttModelNum} == "4" ]]; then
+#                sttModel="openai/whisper-medium"
+#            elif [[ ${sttModelNum} == "5" ]]; then
+#                sttModel="openai/whisper-large-v3"
+#            else
+#                echo
+#                echo "Choose a valid number, or just press enter to use the default number."
+#                whisperSttModelPrompt
+#            fi
+#
+#            echo "Installing requirements, this assumes you have conda installed. If you don't please install it and add it to PATH"
+#            if command -v conda &>/dev/null; then
+#                echo "Conda is installed."
+#
+#                # Check Conda version
+#                conda_version=$(conda --version)
+#                echo "Conda version: $conda_version"
+#
+#                # Check Python version using Conda
+#                python_version=$(conda run python --version 2>&1)
+#                echo "Python version: $python_version"
+#            else
+#                echo "Conda is not installed. Please install it and add to PATH"
+#                exit
+#            fi
+#            pip install flask
+#            pip install torch
+#            pip install tensorflow
+#            pip install --upgrade pip
+#            pip install --upgrade git+https://github.com/huggingface/transformers.git accelerate datasets[audio]
+#            echo "Requirements downloaded. Hope you enjoy!"
+#        whisperSttModelPrompt
+
+    elif [[ ${sttService} == "leopard" ]]; then
         function picoApiPrompt() {
             echo
             echo "Create an account at https://console.picovoice.ai/ and enter the Access Key it gives you."
@@ -180,7 +235,7 @@ function getSTT() {
         }
         picoApiPrompt
         echo "export STT_SERVICE=leopard" >> ./chipper/source.sh
-	echo "export PICOVOICE_APIKEY=${picoKey}" >> ./chipper/source.sh
+	      echo "export PICOVOICE_APIKEY=${picoKey}" >> ./chipper/source.sh
         echo "export PICOVOICE_APIKEY=${picoKey}" > ./chipper/pico.key
     elif [[ ${sttService} == "vosk" ]]; then
         echo "export STT_SERVICE=vosk" >> ./chipper/source.sh
@@ -217,19 +272,19 @@ function getSTT() {
             /usr/local/go/bin/go install github.com/alphacep/vosk-api/go
             cd ${origDir}
         fi
-    # elif [[ ${sttService} == "whisper" ]]; then
-    #     echo "export STT_SERVICE=whisper.cpp" >> ./chipper/source.sh
-    #     origDir="$(pwd)"
-    #     echo "Getting Whisper assets"
-    #     if [[ ! -d ./whisper.cpp ]]; then
-    #         mkdir whisper.cpp
-    #         cd whisper.cpp
-    #         git clone https://github.com/ggerganov/whisper.cpp.git .
-    #         ./models/download-ggml-model.sh tiny
-    #         cd bindings/go
-    #         make whisper
-    #         cd ${origDir}
-    #     fi
+    elif [[ ${sttService} == "whisper" ]]; then
+       echo "export STT_SERVICE=whisper.cpp" >> ./chipper/source.sh
+       origDir="$(pwd)"
+       echo "Getting Whisper assets"
+       if [[ ! -d ./whisper.cpp ]]; then
+           mkdir whisper.cpp
+           cd whisper.cpp
+           git clone https://github.com/ggerganov/whisper.cpp.git .
+           ./models/download-ggml-model.sh medium
+           cd bindings/go
+           make whisper
+           cd ${origDir}
+       fi
     else
     echo "export STT_SERVICE=coqui" >> ./chipper/source.sh
         if [[ ! -f ./stt/completed ]]; then
@@ -540,6 +595,14 @@ function setupSystemd() {
         export CGO_LDFLAGS="-L $HOME/.vosk/libvosk -lvosk -ldl -lpthread"
         export LD_LIBRARY_PATH="$HOME/.vosk/libvosk:$LD_LIBRARY_PATH"
         /usr/local/go/bin/go build cmd/vosk/main.go
+
+    elif [[ ${STT_SERVICE} == "whisper" ]]; then
+        echo "wire-pod.service created, building chipper with Whisper STT service..."
+        export CGO_LDFLAGS="-L$HOME/.whisper/"
+        export CGO_CFLAGS="-I$HOME/.whisper/"
+        export LD_LIBRARY_PATH="$HOME/.whisper/:$LD_LIBRARY_PATH"
+        /usr/local/go/bin/go build chipper/cmd/experimental/whisper/main.go
+        
     else
         echo "wire-pod.service created, building chipper with Coqui STT service..."
         export CGO_LDFLAGS="-L$HOME/.coqui/"
