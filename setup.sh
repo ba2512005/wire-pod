@@ -275,6 +275,10 @@ function getSTT() {
     elif [[ ${sttService} == "whisper" ]]; then
        echo "export STT_SERVICE=whisper.cpp" >> ./chipper/source.sh
        origDir="$(pwd)"
+       export CGO_ENABLED=1
+       export CGO_CFLAGS="-I~/wire-pod/whisper.cpp"
+       export CGO_LDFLAGS="-L~/wire-pod/whisper.cpp"
+
        echo "Getting Whisper assets"
        if [[ ! -d ./whisper.cpp ]]; then
            mkdir whisper.cpp
