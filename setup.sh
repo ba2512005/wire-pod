@@ -202,9 +202,12 @@ function getSTT() {
             echo "Installing requirements, this assumes you have conda installed. If you don't please install it and add it to PATH"
             where = $(which conda)
             if $where; then
-                echo "Conda is installed, initializing."
-                conda init
+                echo "Conda is installed, initializing..."
                 echo $where
+                source $where
+
+                conda init
+                
                 # Check Conda version
                 conda_version=$(conda --version)
                 echo "Conda version: $conda_version"
