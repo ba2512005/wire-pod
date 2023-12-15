@@ -136,8 +136,8 @@ function getSTT() {
         echo "1: Coqui (local, no usage collection, less accurate, a little slower)"
         echo "2: Picovoice Leopard (local, usage collected, accurate, account signup required)"
         echo "3: VOSK (local, inaccurate, multilanguage, fast)"
-        echo "4: Whisper (local, accurate, multilanguage, a little slower, recommended for more powerful hardware)"
-        echo
+        echo "4: Whisper (cpp implementation, tiny model, local, accurate, multilanguage, a little slower, recommended for more powerful hardware)"
+        echo "5: Whisper (Python server implementation, medium model, more accurate, multilanguage, recommended for self hosted server"
         read -p "Enter a number (4): " sttServiceNum
         if [[ ! -n ${sttServiceNum} ]]; then
             sttService="whisper"
@@ -153,6 +153,8 @@ function getSTT() {
         elif [[ ${sttServiceNum} == "3" ]]; then
             sttService="vosk"
         elif [[ ${sttServiceNum} == "4" ]]; then
+            sttService="whisper.cpp"
+        elif [[ ${sttServiceNum} == "5" ]]; then
             sttService="whisper"
         else
             echo
@@ -166,62 +168,65 @@ function getSTT() {
     else
         sttServicePrompt
     fi
-#    if [[ ${sttService} == "whisper" ]]; then
-#        function whisperSttModelPrompt() {
-#
-#            echo
-#            echo "export STT_SERVICE=whisper" >> ./chipper/source.sh
-#            echo "Which Whisper voice model would you like to use? (Whisper-medium)"
-#            echo "Model name | Parameters | Required VRAM | Relative speed"
-#            echo "1: Tiny       39M         ~1GB           ~32x"
-#            echo "2: Base       74M         ~1GB           ~16x"
-#            echo "3: Small      244M        ~2GB           ~6x"
-#            echo "4: Medium     769M        ~5GB           ~2x"
-#            echo "5: Large      1470.13M    ~10GB          1x"
-#            echo
-#            read -p "Enter a number (1-5): " sttModelNum
-#            if [[ ! -n ${sttModelNum} ]]; then
-#                sttModel="openai/whisper-medium"
-#            elif [[ ${sttModelNum} == "1" ]]; then
-#                sttModel="openai/whisper-tiny"
-#            elif [[ ${sttModelNum} == "2" ]]; then
-#                sttModel="openai/whisper-base"
-#            elif [[ ${sttModelNum} == "3" ]]; then
-#                sttModel="openai/whisper-small"
-#            elif [[ ${sttModelNum} == "4" ]]; then
-#                sttModel="openai/whisper-medium"
-#            elif [[ ${sttModelNum} == "5" ]]; then
-#                sttModel="openai/whisper-large-v3"
-#            else
-#                echo
-#                echo "Choose a valid number, or just press enter to use the default number."
-#                whisperSttModelPrompt
-#            fi
-#
-#            echo "Installing requirements, this assumes you have conda installed. If you don't please install it and add it to PATH"
-#            if command -v conda &>/dev/null; then
-#                echo "Conda is installed."
-#
-#                # Check Conda version
-#                conda_version=$(conda --version)
-#                echo "Conda version: $conda_version"
-#
-#                # Check Python version using Conda
-#                python_version=$(conda run python --version 2>&1)
-#                echo "Python version: $python_version"
-#            else
-#                echo "Conda is not installed. Please install it and add to PATH"
-#                exit
-#            fi
-#            pip install flask
-#            pip install torch
-#            pip install tensorflow
-#            pip install --upgrade pip
-#            pip install --upgrade git+https://github.com/huggingface/transformers.git accelerate datasets[audio]
-#            echo "Requirements downloaded. Hope you enjoy!"
-#        whisperSttModelPrompt
+    if [[ ${sttService} == "whisper" ]]; then
+        function whisperSttModelPrompt() {
 
-    if [[ ${sttService} == "leopard" ]]; then
+            echo
+            echo "Which Whisper voice model would you like to use? (Whisper-medium)"
+            echo "Model name | Parameters | Required VRAM | Relative speed"
+            echo "1: Tiny       39M         ~1GB           ~32x"
+            echo "2: Base       74M         ~1GB           ~16x"
+            echo "3: Small      244M        ~2GB           ~6x"
+            echo "4: Medium     769M        ~5GB           ~2x"
+            echo "5: Large      1470.13M    ~10GB          1x"
+            echo
+            read -p "Enter a number (1-5): " sttModelNum
+            if [[ ! -n ${sttModelNum} ]]; then
+                sttModel="openai/whisper-medium"
+            elif [[ ${sttModelNum} == "1" ]]; then
+                sttModel="openai/whisper-tiny"
+            elif [[ ${sttModelNum} == "2" ]]; then
+                sttModel="openai/whisper-base"
+            elif [[ ${sttModelNum} == "3" ]]; then
+                sttModel="openai/whisper-small"
+            elif [[ ${sttModelNum} == "4" ]]; then
+                sttModel="openai/whisper-medium"
+            elif [[ ${sttModelNum} == "5" ]]; then
+                sttModel="openai/whisper-large-v3"
+            else
+                echo
+                echo "Choose a valid number, or just press enter to use the default number."
+                whisperSttModelPrompt
+            fi
+
+            echo "Installing requirements, this assumes you have conda installed. If you don't please install it and add it to PATH"
+            if command -v conda &>/dev/null; then
+                echo "Conda is installed."
+
+                # Check Conda version
+                conda_version=$(conda --version)
+                echo "Conda version: $conda_version"
+
+                # Check Python version using Conda
+                python_version=$(conda run python --version 2>&1)
+                echo "Python version: $python_version"
+            else
+                echo "Conda is not installed. Please install it and add to PATH"
+                exit
+            fi
+            pip install flask
+            pip install torch
+            pip install tensorflow
+            pip install --upgrade pip
+            pip install --upgrade git+https://github.com/huggingface/transformers.git accelerate datasets[audio]
+            echo "Requirements downloaded. Hope you enjoy!"
+        }
+        whisperSttModelPrompt
+        echo "export STT_SERVICE=whisper" >> ./chipper/source.sh
+
+
+
+    elif [[ ${sttService} == "leopard" ]]; then
         function picoApiPrompt() {
             echo
             echo "Create an account at https://console.picovoice.ai/ and enter the Access Key it gives you."
@@ -272,7 +277,7 @@ function getSTT() {
             /usr/local/go/bin/go install github.com/alphacep/vosk-api/go
             cd ${origDir}
         fi
-    elif [[ ${sttService} == "whisper" ]]; then
+    elif [[ ${sttService} == "whisper.cpp" ]]; then
        echo "export STT_SERVICE=whisper.cpp" >> ./chipper/source.sh
        origDir="$(pwd)"
        export CGO_ENABLED=1
