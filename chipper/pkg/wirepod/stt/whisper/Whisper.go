@@ -25,7 +25,8 @@ type openAiResp struct {
 
 func Init() error {
 	if os.Getenv("OPENAI_KEY") == "" {
-		logger.Println("This is an early implementation of the Whisper API which has not been implemented into the web interface. You must set the OPENAI_KEY env var.")
+
+		logger.Println("This is an early implementation of the Whisper API which has not been implemented into the web interface. You must set the OPENAI_KEY env var. Or else use the whisper_local server")
 		//os.Exit(1)
 	}
 	return nil
@@ -77,8 +78,12 @@ func newAudioIntBuffer(r io.Reader) (*audio.IntBuffer, error) {
 }
 
 func makeOpenAIReq(in []byte) string {
-	url := "https://api.openai.com/v1/audio/transcriptions"
-
+    if os.Getenv("OPENAI_KEY") != nil:
+	    url := "https://api.openai.com/v1/audio/transcriptions"
+	    httpReq.Header.Set("Content-Type", w.FormDataContentType())
+	    httpReq.Header.Set("Authorization", "Bearer "+os.Getenv("OPENAI_KEY"))
+	else
+        url := "http://127.0.0.1:5000/process-audio"
 	buf := new(bytes.Buffer)
 	w := multipart.NewWriter(buf)
 	w.WriteField("model", "whisper-1")
@@ -87,8 +92,7 @@ func makeOpenAIReq(in []byte) string {
 	w.Close()
 
 	httpReq, _ := http.NewRequest("POST", url, buf)
-	httpReq.Header.Set("Content-Type", w.FormDataContentType())
-	httpReq.Header.Set("Authorization", "Bearer "+os.Getenv("OPENAI_KEY"))
+
 
 	client := &http.Client{}
 	resp, err := client.Do(httpReq)
