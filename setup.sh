@@ -221,7 +221,7 @@ function getSTT() {
 #            echo "Requirements downloaded. Hope you enjoy!"
 #        whisperSttModelPrompt
 
-    elif [[ ${sttService} == "leopard" ]]; then
+    if [[ ${sttService} == "leopard" ]]; then
         function picoApiPrompt() {
             echo
             echo "Create an account at https://console.picovoice.ai/ and enter the Access Key it gives you."
