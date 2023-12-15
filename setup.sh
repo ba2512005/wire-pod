@@ -138,7 +138,7 @@ function getSTT() {
         echo "3: VOSK (local, inaccurate, multilanguage, fast)"
         echo "4: Whisper (cpp implementation, tiny model, local, accurate, multilanguage, a little slower, recommended for more powerful hardware)"
         echo "5: Whisper (Python server implementation, medium model, more accurate, multilanguage, recommended for self hosted server"
-        read -p "Enter a number (4): " sttServiceNum
+        read -p "Enter a number (5): " sttServiceNum
         if [[ ! -n ${sttServiceNum} ]]; then
             sttService="whisper"
         elif [[ ${sttServiceNum} == "1" ]]; then
@@ -172,7 +172,7 @@ function getSTT() {
         function whisperSttModelPrompt() {
 
             echo
-            echo "Which Whisper voice model would you like to use? (Whisper-medium)"
+            echo "Which Whisper voice model would you like to use?"
             echo "Model name | Parameters | Required VRAM | Relative speed"
             echo "1: Tiny       39M         ~1GB           ~32x"
             echo "2: Base       74M         ~1GB           ~16x"
@@ -180,7 +180,7 @@ function getSTT() {
             echo "4: Medium     769M        ~5GB           ~2x"
             echo "5: Large      1470.13M    ~10GB          1x"
             echo
-            read -p "Enter a number (1-5): " sttModelNum
+            read -p "Enter a number 1-5 (4:medium): " sttModelNum
             if [[ ! -n ${sttModelNum} ]]; then
                 sttModel="openai/whisper-medium"
             elif [[ ${sttModelNum} == "1" ]]; then
@@ -206,20 +206,26 @@ function getSTT() {
                 # Check Conda version
                 conda_version=$(conda --version)
                 echo "Conda version: $conda_version"
-
+                condaEnv = "base"
+                read -p "Enter your conda env (base): " condaEnv
+                conda activate $condaEnv
+                echo "Activating conda env..."
                 # Check Python version using Conda
                 python_version=$(conda run python --version 2>&1)
                 echo "Python version: $python_version"
+                echo "Installing dependencies into $condaEnv"
+                pip install flask
+                pip install torch
+                pip install tensorflow
+                pip install --upgrade pip
+                pip install --upgrade git+https://github.com/huggingface/transformers.git accelerate datasets[audio]
+                echo "Requirements downloaded. Hope you enjoy!"
             else
                 echo "Conda is not installed. Please install it and add to PATH"
                 exit
             fi
-            pip install flask
-            pip install torch
-            pip install tensorflow
-            pip install --upgrade pip
-            pip install --upgrade git+https://github.com/huggingface/transformers.git accelerate datasets[audio]
-            echo "Requirements downloaded. Hope you enjoy!"
+
+
         }
         whisperSttModelPrompt
         echo "export STT_SERVICE=whisper" >> ./chipper/source.sh
