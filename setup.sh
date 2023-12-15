@@ -200,9 +200,10 @@ function getSTT() {
             fi
 
             echo "Installing requirements, this assumes you have conda installed. If you don't please install it and add it to PATH"
-            if where=$(which conda); then
-                echo "Conda is installed."
-                echo $where
+            if $(which conda); then
+                echo "Conda is installed, initializing."
+                conda init
+                echo $(which conda)
                 # Check Conda version
                 conda_version=$(conda --version)
                 echo "Conda version: $conda_version"
@@ -214,10 +215,10 @@ function getSTT() {
                 python_version=$(conda run python --version 2>&1)
                 echo "Python version: $python_version"
                 echo "Installing dependencies into $condaEnv"
+                pip install --upgrade pip
                 pip install flask
                 pip install torch
                 pip install tensorflow
-                pip install --upgrade pip
                 pip install --upgrade git+https://github.com/huggingface/transformers.git accelerate datasets[audio]
                 echo "Requirements downloaded. Hope you enjoy!"
             else
