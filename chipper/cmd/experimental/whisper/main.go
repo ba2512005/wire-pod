@@ -14,7 +14,7 @@ func main() {
 	initwirepod.StartFromProgramInit(stt.Init, stt.STT, stt.Name)
 
 	// Command to run the Python script with arguments if needed
-	cmd := exec.Command("python", "wire-pod/chipper/pkg/wirepod/stt/whisper/Whisper_local.py")
+	cmd := exec.Command("python3", "wire-pod/Whisper_local.py")
 
 	// Run the command and handle any errors
 	output, err := cmd.CombinedOutput()

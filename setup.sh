@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/bin/bash -l
 
-set -e
+set -x
 
 echo
 
