@@ -78,12 +78,7 @@ func newAudioIntBuffer(r io.Reader) (*audio.IntBuffer, error) {
 }
 
 func makeOpenAIReq(in []byte) string {
-    if os.Getenv("OPENAI_KEY") != nil:
-	    url := "https://api.openai.com/v1/audio/transcriptions"
-	    httpReq.Header.Set("Content-Type", w.FormDataContentType())
-	    httpReq.Header.Set("Authorization", "Bearer "+os.Getenv("OPENAI_KEY"))
-	else
-        url := "http://127.0.0.1:5000/process-audio"
+
 	buf := new(bytes.Buffer)
 	w := multipart.NewWriter(buf)
 	w.WriteField("model", "whisper-1")
@@ -91,8 +86,15 @@ func makeOpenAIReq(in []byte) string {
 	sendFile.Write(in)
 	w.Close()
 
-	httpReq, _ := http.NewRequest("POST", url, buf)
+    url := "http://127.0.0.1:5000/process-audio" // Default URL
 
+	httpReq, _ := http.NewRequest("POST", url, buf)
+	httpReq.Header.Set("Content-Type", w.FormDataContentType())
+
+    if os.Getenv("OPENAI_KEY") != "" {
+		url = "https://api.openai.com/v1/audio/transcriptions"
+	    httpReq.Header.Set("Authorization", "Bearer "+os.Getenv("OPENAI_KEY"))
+	}
 
 	client := &http.Client{}
 	resp, err := client.Do(httpReq)
@@ -103,10 +105,15 @@ func makeOpenAIReq(in []byte) string {
 
 	defer resp.Body.Close()
 
-	response, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		return "Unexpected status: " + resp.Status
+	}
 
 	var aiResponse openAiResp
-	json.Unmarshal(response, &aiResponse)
+	if err := json.NewDecoder(resp.Body).Decode(&aiResponse); err != nil {
+		logger.Println(err)
+		return "Failed to parse response."
+	}
 
 	return aiResponse.Text
 }

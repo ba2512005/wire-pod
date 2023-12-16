@@ -1,13 +1,12 @@
 package main
 
 import (
-    "fmt"
+	"fmt"
 	"log"
 	"os/exec"
-	"wire-pod/chipper/pkg/initwirepod"
-	stt "chipper/pkg/wirepod/stt/whisper/Whisper.go"
-	"github.com/kercre123/wire-pod/chipper/pkg/initwirepod"
-	stt "github.com/kercre123/wire-pod/chipper/pkg/wirepod/stt/whisper"
+
+	"wire-pod/chipper/pkg/initwirepod" // Assuming the correct import path
+	stt "github.com/ba2512005/wire-pod/chipper/pkg/wirepod/stt/whisper" // Adjust import path accordingly
 )
 
 func main() {
@@ -19,7 +18,7 @@ func main() {
 	// Run the command and handle any errors
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatalf("Error running Python script: %s\n", err)
+		log.Fatalf("Error running Python script: %v\n", err)
 	}
 
 	// Print the output of the Python script
