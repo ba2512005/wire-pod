@@ -1,8 +1,16 @@
 #!/bin/bash -l
 
-set -x
+set -e
 
 echo
+
+if [[ $1 == "--preserve-env=PATH" ]]; then
+    echo "The script was called with --preserve-env=PATH flag."
+else
+    echo "The script was not called with --preserve-env=PATH flag."
+    echo "Call this script with <sudo --preserve-env=PATH ./setup.sh>"
+
+fi
 
 UNAME=$(uname -a)
 ROOT="/root"
@@ -200,36 +208,43 @@ function getSTT() {
             fi
 
             echo "Installing requirements, this assumes you have conda installed. If you don't please install it and add it to PATH"
+            echo "PATH = $PATH"
             where=$(which conda)
-            if [ -x "${where}" ]; then
-                echo "Conda is installed at ${where}, initializing..."
-                #set conda location
-                source "${where}"
-                conda init
 
-                # Check Conda version
-                conda_version=$(conda --version)
-                echo "Conda version: $conda_version"
-                condaEnv="base"
-                read -p -r "Enter your conda env (base): " condaEnv
-                conda activate $condaEnv
-                echo "Activating conda env..."
-                # Check Python version using Conda
-                python_version=$(conda run python --version 2>&1)
-                echo "Python version: $python_version"
-                echo "Installing dependencies into $condaEnv"
-                pip install --upgrade pip
-                pip install flask
-                pip install torch
-                pip install tensorflow
-                pip install --upgrade git+https://github.com/huggingface/transformers.git accelerate datasets[audio]
-                echo "Requirements downloaded. Hope you enjoy!"
-            else
-                echo "Conda is not installed. Please install it and add to PATH"
-                exit
-            fi
+            function setupWhisper() {
+                local where="$1"
+                if [ -x "${where}" ]; then
+                    echo "Conda is installed at ${where}, initializing..."
+                    #set conda location
+                    source "${where}"
+                    conda init
 
+                    # Check Conda version
+                    conda_version=$(conda --version)
+                    echo "Conda version: $conda_version"
+                    condaEnv="base"
+                    read -p -r "Enter your conda env (base): " condaEnv
+                    conda activate $condaEnv
+                    echo "Activating conda env..."
+                    # Check Python version using Conda
+                    python_version=$(conda run python --version 2>&1)
+                    echo "Python version: $python_version"
+                    echo "Installing dependencies into $condaEnv"
+                    pip install --upgrade pip
+                    pip install flask
+                    pip install torch
+                    pip install tensorflow
+                    pip install --upgrade git+https://github.com/huggingface/transformers.git accelerate datasets[audio]
+                    echo "Requirements downloaded. Hope you enjoy!"
 
+                else
+                    where="$HOME/anaconda3/condabin/conda"
+                    echo "Conda is not installed. Please install it and add to PATH then rerun or specify it here"
+                    read -p "Enter your conda path ($HOME/anaconda3/condabin/conda) : " condaPath
+                    setupWhisper "$condaPath"
+                fi
+            }
+        setupWhisper "$where"
         }
         whisperSttModelPrompt
         echo "export STT_SERVICE=whisper" >> ./chipper/source.sh
