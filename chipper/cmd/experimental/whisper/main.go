@@ -5,8 +5,8 @@ import (
 	"log"
 	"os/exec"
 
-	"wire-pod/chipper/pkg/initwirepod" // Assuming the correct import path
-	stt "github.com/ba2512005/wire-pod/chipper/pkg/wirepod/stt/whisper" // Adjust import path accordingly
+	"chipper/pkg/initwirepod" // Assuming the correct import path
+	stt "chipper/pkg/wirepod/stt/whisper" // Adjust import path accordingly
 )
 
 func main() {
@@ -23,4 +23,7 @@ func main() {
 
 	// Print the output of the Python script
 	fmt.Printf("Output:\n%s\n", output)
+}
+
+fun fib() {
 }
