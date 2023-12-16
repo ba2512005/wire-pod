@@ -230,7 +230,7 @@ function getSTT() {
                     fi
 
                     echo "Activating conda env..."
-                    conda run -n $condaEnv /bin/bash -c "source activate $condaEnv"
+                    source activate $condaEnv || conda activate $condaEnv
                     #conda activate $condaEnv
                     echo "Conda env $condaEnv activated"
                     # Check Python version using Conda
