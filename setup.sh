@@ -200,19 +200,18 @@ function getSTT() {
             fi
 
             echo "Installing requirements, this assumes you have conda installed. If you don't please install it and add it to PATH"
-            where = $(which conda)
-            if $where; then
-                echo "Conda is installed, initializing..."
-                echo $where
-                source $where
-
+            where=$(which conda)
+            if [ -x "${where}" ]; then
+                echo "Conda is installed at ${where}, initializing..."
+                #set conda location
+                source "${where}"
                 conda init
-                
+
                 # Check Conda version
                 conda_version=$(conda --version)
                 echo "Conda version: $conda_version"
-                condaEnv = "base"
-                read -p "Enter your conda env (base): " condaEnv
+                condaEnv="base"
+                read -p -r "Enter your conda env (base): " condaEnv
                 conda activate $condaEnv
                 echo "Activating conda env..."
                 # Check Python version using Conda
