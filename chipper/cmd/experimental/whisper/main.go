@@ -5,8 +5,8 @@ import (
 	"log"
 	"os/exec"
 
-	"chipper/pkg/initwirepod" // Assuming the correct import path
-	stt "chipper/pkg/wirepod/stt/whisper" // Adjust import path accordingly
+	"./initwirepod"
+	stt "./whisper"
 )
 
 func main() {
