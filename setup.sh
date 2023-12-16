@@ -216,9 +216,8 @@ function getSTT() {
                 if [ -x "${where}" ]; then
                     echo "Conda is installed at ${where}, initializing..."
                     #set conda location
-                    source "${where}"
-                    conda init
-
+                    source "$(dirname ${where})/../etc/profile.d/conda.sh"
+                    #conda init
                     # Check Conda version
                     conda_version=$(conda --version)
                     echo "Conda version: $conda_version"
@@ -227,10 +226,13 @@ function getSTT() {
                     if [[ ! -n ${condaEnv} ]]; then
                       condaEnv="base"
                     else
-                      condaEnv="$condaEnv"   
+                      condaEnv="$condaEnv"
                     fi
-                    conda activate $condaEnv
+
                     echo "Activating conda env..."
+                    conda run -n $condaEnv /bin/bash -c "source activate $condaEnv"
+                    #conda activate $condaEnv
+                    echo "Conda env $condaEnv activated"
                     # Check Python version using Conda
                     python_version=$(conda run python --version 2>&1)
                     echo "Python version: $python_version"
