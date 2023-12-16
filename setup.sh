@@ -222,8 +222,13 @@ function getSTT() {
                     # Check Conda version
                     conda_version=$(conda --version)
                     echo "Conda version: $conda_version"
-                    condaEnv="base"
+
                     read -p -r "Enter your conda env (base): " condaEnv
+                    if [[ ! -n ${condaEnv} ]]; then
+                      condaEnv="base"
+                    else
+                      condaEnv="$condaEnv"   
+                    fi
                     conda activate $condaEnv
                     echo "Activating conda env..."
                     # Check Python version using Conda
