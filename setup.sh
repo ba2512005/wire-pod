@@ -222,7 +222,7 @@ function getSTT() {
                     conda_version=$(conda --version)
                     echo "Conda version: $conda_version"
 
-                    read -p -r "Enter your conda env (base): " condaEnv
+                    read -p "Enter your conda env (base): " condaEnv
                     if [[ ! -n ${condaEnv} ]]; then
                       condaEnv="base"
                     else
