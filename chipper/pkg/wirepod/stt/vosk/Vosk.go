@@ -10,9 +10,9 @@ import (
 	"time"
 
 	vosk "github.com/alphacep/vosk-api/go"
-	"github.com/kercre123/wire-pod/chipper/pkg/logger"
-	"github.com/kercre123/wire-pod/chipper/pkg/vars"
-	sr "github.com/kercre123/wire-pod/chipper/pkg/wirepod/speechrequest"
+	"github.com/ba2512005/wire-pod/chipper/pkg/logger"
+	"github.com/ba2512005/wire-pod/chipper/pkg/vars"
+	sr "github.com/ba2512005/wire-pod/chipper/pkg/wirepod/speechrequest"
 )
 
 var GrammerEnable bool = false

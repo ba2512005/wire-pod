@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io"
 
-	sr "github.com/kercre123/wire-pod/chipper/pkg/wirepod/speechrequest"
+	sr "github.com/ba2512005/wire-pod/chipper/pkg/wirepod/speechrequest"
 	"github.com/soundhound/houndify-sdk-go"
 )
 

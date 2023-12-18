@@ -39,3 +39,4 @@
 /chipper/macos/target
 /whisper.cpp
 .DS_Store
+.idea/

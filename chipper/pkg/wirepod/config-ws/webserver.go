@@ -10,11 +10,11 @@ import (
 	"runtime"
 	"path/filepath"
 
-	"github.com/kercre123/wire-pod/chipper/pkg/logger"
-	"github.com/kercre123/wire-pod/chipper/pkg/vars"
-	"github.com/kercre123/wire-pod/chipper/pkg/wirepod/localization"
-	processreqs "github.com/kercre123/wire-pod/chipper/pkg/wirepod/preqs"
-	botsetup "github.com/kercre123/wire-pod/chipper/pkg/wirepod/setup"
+	"github.com/ba2512005/wire-pod/chipper/pkg/logger"
+	"github.com/ba2512005/wire-pod/chipper/pkg/vars"
+	"github.com/ba2512005/wire-pod/chipper/pkg/wirepod/localization"
+	processreqs "github.com/ba2512005/wire-pod/chipper/pkg/wirepod/preqs"
+	botsetup "github.com/ba2512005/wire-pod/chipper/pkg/wirepod/setup"
 	"github.com/ncruces/zenity"
 )
 

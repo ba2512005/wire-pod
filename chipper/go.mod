@@ -1,4 +1,4 @@
-module github.com/kercre123/wire-pod/chipper
+module github.com/ba2512005/wire-pod/chipper
 
 go 1.18
 

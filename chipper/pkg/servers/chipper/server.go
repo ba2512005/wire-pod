@@ -2,7 +2,7 @@ package server
 
 import (
 	pb "github.com/digital-dream-labs/api/go/chipperpb"
-	"github.com/kercre123/wire-pod/chipper/pkg/vtt"
+	"github.com/ba2512005/wire-pod/chipper/pkg/vtt"
 )
 
 type intentProcessor interface {

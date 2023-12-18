@@ -1,11 +1,11 @@
 package processreqs
 
 import (
-	"github.com/kercre123/wire-pod/chipper/pkg/logger"
-	"github.com/kercre123/wire-pod/chipper/pkg/vars"
-	"github.com/kercre123/wire-pod/chipper/pkg/vtt"
-	sr "github.com/kercre123/wire-pod/chipper/pkg/wirepod/speechrequest"
-	ttr "github.com/kercre123/wire-pod/chipper/pkg/wirepod/ttr"
+	"github.com/ba2512005/wire-pod/chipper/pkg/logger"
+	"github.com/ba2512005/wire-pod/chipper/pkg/vars"
+	"github.com/ba2512005/wire-pod/chipper/pkg/vtt"
+	sr "github.com/ba2512005/wire-pod/chipper/pkg/wirepod/speechrequest"
+	ttr "github.com/ba2512005/wire-pod/chipper/pkg/wirepod/ttr"
 )
 
 // This is here for compatibility with 1.6 and older software

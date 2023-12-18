@@ -7,7 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/kercre123/wire-pod/chipper/pkg/podonwin"
+	"github.com/ba2512005/wire-pod/chipper/pkg/podonwin"
 )
 
 var GitHubTag string

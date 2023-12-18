@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"github.com/kercre123/wire-pod/chipper/pkg/podonwin"
+	"github.com/ba2512005/wire-pod/chipper/pkg/podonwin"
 	"github.com/ncruces/zenity"
 )
 
