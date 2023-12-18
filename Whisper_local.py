@@ -1,4 +1,6 @@
 import os
+import traceback
+
 from flask import Flask, jsonify, request
 import torch
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
@@ -9,7 +11,7 @@ app = Flask(__name__)
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
 
-model_id = os.getenv("sttModel", "openai/whisper-large-v3")
+model_id = os.getenv("sttModel", "openai/whisper-medium")
 
 model = AutoModelForSpeechSeq2Seq.from_pretrained(
     model_id, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
@@ -52,7 +54,9 @@ def process_audio():
     except Exception as e:
         # Handle exceptions and return an error response
         error_message = f"An error occurred: {str(e)}"
-        return jsonify({'error': error_message}), 500  # HTTP status code 500 for internal server error
+        error_info = traceback.format_exc()
+        traceback.print_exc()
+        return jsonify({'error': error_message, 'traceback': error_info}), 500  # HTTP status code 500 for internal server error
 
 if __name__ == '__main__':
     app.run(debug=True)  # Run the Flask app

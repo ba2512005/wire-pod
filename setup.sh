@@ -241,6 +241,7 @@ function getSTT() {
                     pip install flask
                     pip install torch
                     pip install tensorflow
+                    pip install tensorrt
                     pip install --upgrade git+https://github.com/huggingface/transformers.git accelerate datasets[audio]
                     echo "Requirements downloaded. Hope you enjoy!"
 
