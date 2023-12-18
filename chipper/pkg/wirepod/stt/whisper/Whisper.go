@@ -21,6 +21,7 @@ var Name string = "whisper"
 
 type openAiResp struct {
 	Text string `json:"text"`
+	Elapsed_time string `json:"elapsed_time"`
 }
 
 func Init() error {
@@ -114,7 +115,7 @@ func makeOpenAIReq(in []byte) string {
 		logger.Println(err)
 		return "Failed to parse response."
 	}
-
+    logger.Println("Time to respond:", aiResponse.Elapsed_time)
 	return aiResponse.Text
 }
 

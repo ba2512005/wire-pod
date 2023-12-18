@@ -1,5 +1,7 @@
 import os
 import traceback
+import time
+
 import numpy as np
 from flask import Flask, jsonify, request
 import torch
@@ -11,7 +13,7 @@ app = Flask(__name__)
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
 
-model_id = os.getenv("sttModel", "openai/whisper-medium")
+model_id = os.getenv("sttModel", "openai/whisper-tiny.en")
 
 model = AutoModelForSpeechSeq2Seq.from_pretrained(
     model_id, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
@@ -37,14 +39,19 @@ pipe = pipeline(
 @app.route('/process-audio', methods=['POST'])
 def process_audio():
     try:
+        start_time = time.time()
         # Access the audio data from the POST request
         audio_data = request.files['file'].read()  # Read the audio file data directly
         audio_array = np.frombuffer(audio_data, dtype=np.int16)  # Create the audio array
         result = pipe(audio_array)  # Process the audio using your model pipeline (`pipe`)
+        result.wait()
+        end_time = time.time()
+        print(f"Processing time: {end_time - start_time} seconds")
+        # Extract the transcribed text from the result
         text_result = result["text"]
 
         # Return the processed text as a JSON response
-        return jsonify({'transcribed_text': text_result})
+        return jsonify({'Text': text_result, 'elapsed_time': end_time - start_time})
 
     except Exception as e:
         # Handle exceptions and return an error response
