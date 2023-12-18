@@ -5,8 +5,8 @@ import (
 	"log"
 	"os/exec"
 
-	"./initwirepod"
-	stt "./whisper"
+	"github.com/ba2512005/wire-pod/chipper/pkg/initwirepod"
+	stt "github.com/ba2512005/wire-pod/chipper/pkg/wirepod/stt/whisper"
 )
 
 func main() {
