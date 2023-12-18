@@ -45,7 +45,7 @@ def process_audio():
         audio_file.save(file)
 
         # Process the audio using your model pipeline (`pipe`)
-        result = pipe(file)
+        result = pipe(audio_file)
         text_result = result["text"]
 
         # Return the processed text as a JSON response

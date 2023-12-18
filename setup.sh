@@ -243,6 +243,7 @@ function getSTT() {
                     pip install tensorflow
                     pip install tensorrt
                     pip install --upgrade git+https://github.com/huggingface/transformers.git accelerate datasets[audio]
+                    sudo apt install ffmpeg
                     echo "Requirements downloaded. Hope you enjoy!"
 
                 else
