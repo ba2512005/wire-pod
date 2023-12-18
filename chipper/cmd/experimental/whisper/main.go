@@ -25,5 +25,3 @@ func main() {
 	fmt.Printf("Output:\n%s\n", output)
 }
 
-fun fib() {
-}
