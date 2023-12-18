@@ -46,7 +46,7 @@ def process_audio():
         audio_array = np.frombuffer(audio_file.read(), dtype=np.int16)
 
         # Process the audio using your model pipeline (`pipe`)
-        result = pipe(audio_array, return_timestamps=True)
+        result = pipe(audio_array)
         text_result = result["text"]
 
         # Return the processed text as a JSON response
