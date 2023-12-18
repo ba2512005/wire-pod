@@ -1,6 +1,6 @@
 import os
 import traceback
-
+import numpy as np
 from flask import Flask, jsonify, request
 import torch
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
@@ -43,9 +43,10 @@ def process_audio():
 
         # Save the received audio to a file
         audio_file.save(file)
+        audio_array = np.frombuffer(audio_file.read(), dtype=np.int16)
 
         # Process the audio using your model pipeline (`pipe`)
-        result = pipe(audio_file)
+        result = pipe(audio_array, return_timestamps=True)
         text_result = result["text"]
 
         # Return the processed text as a JSON response
