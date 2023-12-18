@@ -38,15 +38,9 @@ pipe = pipeline(
 def process_audio():
     try:
         # Access the audio data from the POST request
-        audio_file = request.files['file']
-        file = "audio.mp3"
-
-        # Save the received audio to a file
-        audio_file.save(file)
-        audio_array = np.frombuffer(audio_file.read(), dtype=np.int16)
-
-        # Process the audio using your model pipeline (`pipe`)
-        result = pipe(audio_array)
+        audio_data = request.files['file'].read()  # Read the audio file data directly
+        audio_array = np.frombuffer(audio_data, dtype=np.int16)  # Create the audio array
+        result = pipe(audio_array)  # Process the audio using your model pipeline (`pipe`)
         text_result = result["text"]
 
         # Return the processed text as a JSON response
