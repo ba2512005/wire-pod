@@ -39,12 +39,14 @@ pipe = pipeline(
 # Define a route to process audio
 @app.route('/process-audio', methods=['POST'])
 async def process_audio():
+    response_q = asyncio.Queue()
     try:
         start_time = time.time()
         # Access the audio data from the POST request
         audio_data = request.files['file'].read()  # Read the audio file data directly
         audio_array = np.frombuffer(audio_data, dtype=np.int16)  # Create the audio array
-        result = await pipe(audio_array)  # Process the audio using your model pipeline (`pipe`)
+        result = pipe(audio_array)
+        time.sleep(1) # Process the audio using your model pipeline (`pipe`)
         end_time = time.time()
         print(f"Processing time: {end_time - start_time} seconds")
         # Extract the transcribed text from the result
