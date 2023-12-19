@@ -43,8 +43,7 @@ def process_audio():
         # Access the audio data from the POST request
         audio_data = request.files['file'].read()  # Read the audio file data directly
         audio_array = np.frombuffer(audio_data, dtype=np.int16)  # Create the audio array
-        result = pipe(audio_array)  # Process the audio using your model pipeline (`pipe`)
-        result.result()
+        result = pipe(audio_array).result()  # Process the audio using your model pipeline (`pipe`)
         end_time = time.time()
         print(f"Processing time: {end_time - start_time} seconds")
         # Extract the transcribed text from the result
