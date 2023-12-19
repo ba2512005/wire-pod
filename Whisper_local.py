@@ -42,7 +42,7 @@ async def process_audio():
     try:
         start_time = time.time()
         # Access the audio data from the POST request
-        audio_data = await request.files['file'].read()  # Read the audio file data directly
+        audio_data = request.files['file'].read()  # Read the audio file data directly
         audio_array = np.frombuffer(audio_data, dtype=np.int16)  # Create the audio array
         result = await pipe(audio_array)  # Process the audio using your model pipeline (`pipe`)
         end_time = time.time()
