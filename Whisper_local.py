@@ -53,7 +53,7 @@ async def process_audio():
         text_result = result["text"]
 
         # Return the processed text as a JSON response
-        return jsonify({'Text': text_result, 'elapsed_time': end_time - start_time})
+        return jsonify({'Text': text_result})
 
     except Exception as e:
         # Handle exceptions and return an error response
