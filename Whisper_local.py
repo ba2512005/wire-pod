@@ -38,7 +38,7 @@ pipe = pipeline(
 
 # Define a route to process audio
 @app.route('/process-audio', methods=['POST'])
-def process_audio():
+async def process_audio():
     try:
         start_time = time.time()
         # Access the audio data from the POST request
