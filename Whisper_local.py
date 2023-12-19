@@ -2,7 +2,7 @@ import os
 import traceback
 import time
 import asyncio
-
+import ffmpeg
 import numpy as np
 from flask import Flask, jsonify, request
 import torch
@@ -14,7 +14,7 @@ app = Flask(__name__)
 device = "cuda:0" if torch.cuda.is_available() else "cpu"
 torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
 
-model_id = os.getenv("sttModel", "openai/whisper-tiny.en")
+model_id = os.getenv("sttModel", "openai/whisper-medium")
 
 model = AutoModelForSpeechSeq2Seq.from_pretrained(
     model_id, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
@@ -41,10 +41,30 @@ pipe = pipeline(
 async def process_audio():
     response_q = asyncio.Queue()
     try:
+        file = request.files['file']
         start_time = time.time()
         # Access the audio data from the POST request
-        audio_data = request.files['file'].read()  # Read the audio file data directly
-        audio_array = np.frombuffer(audio_data, dtype=np.int16)  # Create the audio array
+        if isinstance(file, bytes):
+            inp = file
+            file = 'pipe:'
+        else:
+            inp = None
+
+        try:
+            # This launches a subprocess to decode audio while down-mixing and resampling as necessary.
+            # Requires the ffmpeg CLI and `ffmpeg-python` package to be installed.
+            out, _ = (
+                ffmpeg.input(file, threads=0)
+                .output("-", format="s16le", acodec="pcm_s16le", ac=1, ar=sr)
+                .run(cmd="ffmpeg", capture_stdout=True, capture_stderr=True, input=inp)
+            )
+        except ffmpeg.Error as e:
+            raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
+
+        audio_array = np.frombuffer(out, np.int16).flatten().astype(np.float32) / 32768.0
+
+        #audio_data = request.files['file'].read()  # Read the audio file data directly
+        #audio_array = np.frombuffer(audio_data, dtype=np.int16)  # Create the audio array
         result = pipe(audio_array)
         time.sleep(1) # Process the audio using your model pipeline (`pipe`)
         end_time = time.time()

@@ -115,7 +115,7 @@ func makeOpenAIReq(in []byte) string {
 		logger.Println(err)
 		return "Failed to parse response."
 	}
-    logger.Println("Time to respond:", aiResponse.Elapsed_time)
+
 	return aiResponse.Text
 }
 
