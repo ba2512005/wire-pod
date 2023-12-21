@@ -4,6 +4,7 @@ import time
 import asyncio
 import ffmpeg
 import numpy as np
+import whisper
 from flask import Flask, jsonify, request
 import torch
 from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
@@ -16,26 +17,7 @@ torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
 
 model_id = os.getenv("sttModel", "openai/whisper-medium")
 
-model = AutoModelForSpeechSeq2Seq.from_pretrained(
-    model_id, torch_dtype=torch_dtype, low_cpu_mem_usage=True, use_safetensors=True
-)
-model.to(device)
-
-processor = AutoProcessor.from_pretrained(model_id)
-
-pipe = pipeline(
-    "automatic-speech-recognition",
-    model=model,
-    tokenizer=processor.tokenizer,
-    feature_extractor=processor.feature_extractor,
-    max_new_tokens=128,
-    chunk_length_s=30,
-    batch_size=16,
-    return_timestamps=True,
-    torch_dtype=torch_dtype,
-    device=device,
-)
-
+model = whisper.load_model(model_id, device=device, dtype=torch_dtype)
 # Define a route to process audio
 @app.route('/process-audio', methods=['POST'])
 async def process_audio():
@@ -55,7 +37,7 @@ async def process_audio():
             # Requires the ffmpeg CLI and `ffmpeg-python` package to be installed.
             out, _ = (
                 ffmpeg.input(file, threads=0)
-                .output("-", format="s16le", acodec="pcm_s16le", ac=1, ar=sr)
+                .output("-", format="s16le", acodec="pcm_s16le", ac=1, ar=16000)
                 .run(cmd="ffmpeg", capture_stdout=True, capture_stderr=True, input=inp)
             )
         except ffmpeg.Error as e:
