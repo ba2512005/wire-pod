@@ -57,7 +57,7 @@ async def process_audio():
             # This launches a subprocess to decode audio while down-mixing and resampling as necessary.
             # Requires the ffmpeg CLI and `ffmpeg-python` package to be installed.
             out, _ = (
-                ffmpeg.input('pipe:', threads=0)
+                ffmpeg.input('pipe:', threads=16)
                 .output("-", format="s16le", acodec="pcm_s16le", ac=1, ar=16000)
                 .run(cmd="ffmpeg", capture_stdout=True, capture_stderr=True, input=file_data)
             )
@@ -69,7 +69,7 @@ async def process_audio():
         #audio_data = request.files['file'].read()  # Read the audio file data directly
         #audio_array = np.frombuffer(audio_data, dtype=np.int16)  # Create the audio array
         result = pipe(audio_array)
-        time.sleep(1) # Process the audio using your model pipeline (`pipe`)
+        #time.sleep(1) # Process the audio using your model pipeline (`pipe`)
         end_time = time.time()
         print(f"Processing time: {end_time - start_time} seconds")
         # Extract the transcribed text from the result
