@@ -43,6 +43,8 @@ async def process_audio():
     response_q = asyncio.Queue()
     try:
         file = request.files['file']
+        filename = file.filename
+        file_data = file.read()
         start_time = time.time()
         # Access the audio data from the POST request
         if isinstance(file, bytes):
@@ -55,9 +57,9 @@ async def process_audio():
             # This launches a subprocess to decode audio while down-mixing and resampling as necessary.
             # Requires the ffmpeg CLI and `ffmpeg-python` package to be installed.
             out, _ = (
-                ffmpeg.input(file, threads=0)
+                ffmpeg.input('pipe:', threads=0)
                 .output("-", format="s16le", acodec="pcm_s16le", ac=1, ar=16000)
-                .run(cmd="ffmpeg", capture_stdout=True, capture_stderr=True, input=inp)
+                .run(cmd="ffmpeg", capture_stdout=True, capture_stderr=True, input=file_data)
             )
         except ffmpeg.Error as e:
             raise RuntimeError(f"Failed to load audio: {e.stderr.decode()}") from e
