@@ -144,11 +144,10 @@ function getSTT() {
         echo "1: Coqui (local, no usage collection, less accurate, a little slower)"
         echo "2: Picovoice Leopard (local, usage collected, accurate, account signup required)"
         echo "3: VOSK (local, inaccurate, multilanguage, fast)"
-        echo "4: Whisper (cpp implementation, tiny model, local, accurate, multilanguage, a little slower, recommended for more powerful hardware)"
-        echo "5: Whisper (Python server implementation, medium model, more accurate, multilanguage, recommended for self hosted server"
-        read -p "Enter a number (5): " sttServiceNum
+        echo "4: Whisper (cpp implementation, medium model, local, accurate, multilanguage, a little slower, recommended for more powerful hardware)"
+        read -p "Enter a number (4): " sttServiceNum
         if [[ ! -n ${sttServiceNum} ]]; then
-            sttService="whisper"
+            sttService="whisper.cpp"
         elif [[ ${sttServiceNum} == "1" ]]; then
             if [[ ${TARGET} == "darwin" ]]; then
                 echo "Coqui is not supported for macOS. Please select another option."
@@ -162,105 +161,14 @@ function getSTT() {
             sttService="vosk"
         elif [[ ${sttServiceNum} == "4" ]]; then
             sttService="whisper.cpp"
-        elif [[ ${sttServiceNum} == "5" ]]; then
-            sttService="whisper"
         else
             echo
             echo "Choose a valid number, or just press enter to use the default number."
             sttServicePrompt
         fi
     }
-    if [[ "$STT" == "vosk" ]]; then
-        echo "Vosk config"
-        sttService="vosk"
-    else
-        sttServicePrompt
-    fi
-    if [[ ${sttService} == "whisper" ]]; then
-        function whisperSttModelPrompt() {
 
-            echo
-            echo "Which Whisper voice model would you like to use?"
-            echo "Model name | Parameters | Required VRAM | Relative speed"
-            echo "1: Tiny       39M         ~1GB           ~32x"
-            echo "2: Base       74M         ~1GB           ~16x"
-            echo "3: Small      244M        ~2GB           ~6x"
-            echo "4: Medium     769M        ~5GB           ~2x"
-            echo "5: Large      1470.13M    ~10GB          1x"
-            echo
-            read -p "Enter a number 1-5 (4:medium): " sttModelNum
-            if [[ ! -n ${sttModelNum} ]]; then
-                sttModel="openai/whisper-medium"
-            elif [[ ${sttModelNum} == "1" ]]; then
-                sttModel="openai/whisper-tiny"
-            elif [[ ${sttModelNum} == "2" ]]; then
-                sttModel="openai/whisper-base"
-            elif [[ ${sttModelNum} == "3" ]]; then
-                sttModel="openai/whisper-small"
-            elif [[ ${sttModelNum} == "4" ]]; then
-                sttModel="openai/whisper-medium"
-            elif [[ ${sttModelNum} == "5" ]]; then
-                sttModel="openai/whisper-large-v3"
-            else
-                echo
-                echo "Choose a valid number, or just press enter to use the default number."
-                whisperSttModelPrompt
-            fi
-
-            echo "Installing requirements, this assumes you have conda installed. If you don't please install it and add it to PATH"
-            echo "PATH = $PATH"
-            where=$(which conda)
-
-            function setupWhisper() {
-                local where="$1"
-                if [ -x "${where}" ]; then
-                    echo "Conda is installed at ${where}, initializing..."
-                    #set conda location
-                    source "$(dirname ${where})/../etc/profile.d/conda.sh"
-                    #conda init
-                    # Check Conda version
-                    conda_version=$(conda --version)
-                    echo "Conda version: $conda_version"
-
-                    read -p "Enter your conda env (base): " condaEnv
-                    if [[ ! -n ${condaEnv} ]]; then
-                      condaEnv="base"
-                    else
-                      condaEnv="$condaEnv"
-                    fi
-
-                    echo "Activating conda env..."
-                    source activate $condaEnv || conda activate $condaEnv
-                    #conda activate $condaEnv
-                    echo "Conda env $condaEnv activated"
-                    # Check Python version using Conda
-                    python_version=$(conda run python --version 2>&1)
-                    echo "Python version: $python_version"
-                    echo "Installing dependencies into $condaEnv"
-                    pip install --upgrade pip
-                    pip install flask
-                    pip install torch
-                    pip install tensorflow
-                    pip install tensorrt
-                    pip install --upgrade git+https://github.com/huggingface/transformers.git accelerate datasets[audio]
-                    sudo apt install ffmpeg
-                    echo "Requirements downloaded. Hope you enjoy!"
-
-                else
-                    where="$HOME/anaconda3/condabin/conda"
-                    echo "Conda is not installed. Please install it and add to PATH then rerun or specify it here"
-                    read -p "Enter your conda path ($HOME/anaconda3/condabin/conda) : " condaPath
-                    setupWhisper "$condaPath"
-                fi
-            }
-        setupWhisper "$where"
-        }
-        whisperSttModelPrompt
-        echo "export STT_SERVICE=whisper" >> ./chipper/source.sh
-
-
-
-    elif [[ ${sttService} == "leopard" ]]; then
+    if [[ ${sttService} == "leopard" ]]; then
         function picoApiPrompt() {
             echo
             echo "Create an account at https://console.picovoice.ai/ and enter the Access Key it gives you."
