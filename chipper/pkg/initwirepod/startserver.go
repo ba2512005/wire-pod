@@ -13,6 +13,7 @@ import (
 	"github.com/digital-dream-labs/api/go/tokenpb"
 	"github.com/digital-dream-labs/hugh/log"
 	"github.com/kercre123/wire-pod/chipper/pkg/logger"
+	"github.com/kercre123/wire-pod/chipper/pkg/mdnshandler"
 	chipperserver "github.com/kercre123/wire-pod/chipper/pkg/servers/chipper"
 	jdocsserver "github.com/kercre123/wire-pod/chipper/pkg/servers/jdocs"
 	tokenserver "github.com/kercre123/wire-pod/chipper/pkg/servers/token"
@@ -26,6 +27,8 @@ import (
 
 	grpcserver "github.com/digital-dream-labs/hugh/grpc/server"
 )
+
+var PostingmDNS bool
 
 var serverOne cmux.CMux
 var serverTwo cmux.CMux
@@ -94,7 +97,7 @@ func BeginWirepodSpecific(sttInitFunc func() error, sttHandlerFunc interface{}, 
 }
 
 func StartFromProgramInit(sttInitFunc func() error, sttHandlerFunc interface{}, voiceProcessorName string) {
-	if runtime.GOOS == "android" {
+	if runtime.GOOS == "android" || runtime.GOOS == "ios" {
 		os.Setenv("DEBUG_LOGGING", "true")
 		os.Setenv("STT_SERVICE", "vosk")
 	}
@@ -108,31 +111,10 @@ func StartFromProgramInit(sttInitFunc func() error, sttHandlerFunc interface{}, 
 		logger.Println("\033[33m\033[1mWire-pod is not setup. Use the webserver at port 8080 to set up wire-pod.\033[0m")
 		vars.APIConfig.PastInitialSetup = false
 	} else {
-		//go PostmDNS()
 		go StartChipper()
 	}
 	// main thread is configuration ws
 	wpweb.StartWebServer()
-}
-
-// func PostmDNS() {
-// 	logger.Println("Registering escapepod.local on network (every minute)")
-// 	mdnsport, _ := freeport.GetFreePort()
-// 	for {
-// 		ipAddr := botsetup.GetOutboundIP().String()
-// 		server, _ := zeroconf.RegisterProxy("escapepod", "_app-proto._tcp", "local.", mdnsport, "escapepod", []string{ipAddr}, []string{"txtv=0", "lo=1", "la=2"}, nil)
-// 		time.Sleep(time.Second * 60)
-// 		server.Shutdown()
-// 		server = nil
-// 	}
-// }
-
-func CheckHostname() {
-	hostname, _ := os.Hostname()
-	if hostname != "escapepod" && vars.APIConfig.Server.EPConfig {
-		logger.Println("\033[31m\033[1mWARNING: You have chosen the Escape Pod config, but the system hostname is not 'escapepod'. This means your robot will not be able to communicate with wire-pod unless you have a custom network configuration.")
-		logger.Println("Actual reported hostname: " + hostname + "\033[0m")
-	}
 }
 
 func RestartServer() {
@@ -145,11 +127,21 @@ func RestartServer() {
 	go StartChipper()
 }
 
+func StopServer() {
+	if chipperServing {
+		serverOne.Close()
+		serverTwo.Close()
+		listenerOne.Close()
+		listenerTwo.Close()
+	}
+}
+
 func StartChipper() {
 	// load certs
+	go mdnshandler.PostmDNS()
 	var certPub []byte
 	var certPriv []byte
-	if runtime.GOOS == "android" {
+	if runtime.GOOS == "android" || runtime.GOOS == "ios" {
 		if vars.APIConfig.Server.EPConfig {
 			certPub, _ = os.ReadFile(vars.AndroidPath + "/static/epod/ep.crt")
 			certPriv, _ = os.ReadFile(vars.AndroidPath + "/static/epod/ep.key")
@@ -184,7 +176,7 @@ func StartChipper() {
 		os.Exit(1)
 	}
 	if runtime.GOOS == "android" && vars.APIConfig.Server.Port == "443" {
-		logger.Println("not starting chipper at port 443 because android...")
+		logger.Println("not starting chipper at port 443 because android")
 	} else {
 		logger.Println("Starting chipper server at port " + vars.APIConfig.Server.Port)
 		listenerOne, err = tls.Listen("tcp", ":"+vars.APIConfig.Server.Port, &tls.Config{
