@@ -90,16 +90,16 @@ function getPackages() {
     echo "Installing required packages"
     if [[ ${TARGET} == "debian" ]]; then
         apt update -y
-        apt install -y wget openssl net-tools libsox-dev libopus-dev make iproute2 xz-utils libopusfile-dev pkg-config gcc curl g++ unzip avahi-daemon git libasound2-dev libsodium-dev cmake
+        apt install -y wget openssl net-tools libsox-dev libopus-dev make iproute2 xz-utils libopusfile-dev pkg-config gcc curl g++ unzip avahi-daemon git libasound2-dev libsodium-dev
         elif [[ ${TARGET} == "arch" ]]; then
         pacman -Sy --noconfirm
-        sudo pacman -S --noconfirm wget openssl net-tools sox opus make iproute2 opusfile curl unzip avahi git libsodium go pkg-config cmake
+        sudo pacman -S --noconfirm wget openssl net-tools sox opus make iproute2 opusfile curl unzip avahi git libsodium go pkg-config 
         elif [[ ${TARGET} == "fedora" ]]; then
         dnf update
-        dnf install -y wget openssl net-tools sox opus make opusfile curl unzip avahi git libsodium-devel cmake
+        dnf install -y wget openssl net-tools sox opus make opusfile curl unzip avahi git libsodium-devel
         elif [[ ${TARGET} == "darwin" ]]; then
         sudo -u $SUDO_USER brew update
-        sudo -u $SUDO_USER brew install wget pkg-config opus opusfile cmake
+        sudo -u $SUDO_USER brew install wget pkg-config opus opusfile
     fi
     touch ./vector-cloud/packagesGotten
     echo
@@ -118,9 +118,9 @@ function getPackages() {
                 wget -q --show-progress --no-check-certificate https://go.dev/dl/go1.22.4.linux-armv6l.tar.gz
                 rm -rf /usr/local/go && tar -C /usr/local -xzf go1.22.4.linux-armv6l.tar.gz
             fi
-	    if [[ ! -f /usr/bin/go ]] && [[ ! -e /usr/bin/go ]]; then
+            if [[ ! -f /usr/bin/go ]] && [[ ! -e /usr/bin/go ]]; then
                 ln -s /usr/local/go/bin/go /usr/bin/go
-	    fi
+            fi
         fi
     else
         echo "This is a macOS or arch target, assuming Go is installed already"
@@ -143,7 +143,7 @@ function getSTT() {
         echo "1: Coqui (local, no usage collection, less accurate, a little slower)"
         echo "2: Picovoice Leopard (local, usage collected, accurate, account signup required)"
         echo "3: VOSK (local, accurate, multilanguage, fast, recommended)"
-        echo "4: Whisper (local, accurate, multilanguage, recommended ONLY for more powerful hardware, please don't run on a Pi)"
+        echo "4: Whisper (local, accurate, multilanguage, a little slower, recommended for more powerful hardware)"
         echo
         read -p "Enter a number (3): " sttServiceNum
         if [[ ! -n ${sttServiceNum} ]]; then
@@ -232,7 +232,6 @@ function getSTT() {
             mkdir whisper.cpp
             cd whisper.cpp
             git clone https://github.com/ggerganov/whisper.cpp.git .
-            git checkout 7fd6fa809749078aa00edf945e959c898f2bd1af
         else
             cd whisper.cpp
         fi
@@ -256,12 +255,8 @@ function getSTT() {
             fi
         }
         whichWhisperModel
-        ./models/download-ggml-model.sh $whispermodel
-        rm -rf build_go
-	cmake -B build_go \
-	-DCMAKE_POSITION_INDEPENDENT_CODE=ON
-	cmake --build build_go --config Release
-        cd ${origDir}
+        make
+        cd ..
         echo "export WHISPER_MODEL=$whispermodel" >> ./chipper/source.sh
     else
         echo "export STT_SERVICE=coqui" >> ./chipper/source.sh
