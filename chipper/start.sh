@@ -67,20 +67,20 @@ if [[ ${STT_SERVICE} == "leopard" ]]; then
         export C_INCLUDE_PATH="../whisper.cpp"
         export LIBRARY_PATH="../whisper.cpp"
         export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$(pwd)/../whisper.cpp:$(pwd)/../whisper.cpp/build:$(pwd)/../whisper.cpp/build/src"
-        export CGO_LDFLAGS="-L$(pwd)/../whisper.cpp/build_go/src"
+        export CGO_LDFLAGS="-L$(pwd)/../whisper.cpp/build"
         export CGO_CFLAGS="-I$(pwd)/../whisper.cpp"
         ./chipper
     else
         export C_INCLUDE_PATH="../whisper.cpp"
         export LIBRARY_PATH="../whisper.cpp"
-        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$(pwd)/../whisper.cpp:$(pwd)/../whisper.cpp/build:$(pwd)/../whisper.cpp/build_go/src:$(pwd)/../whisper.cpp/build_go/ggml/src"
-        export CGO_LDFLAGS="-L$(pwd)/../whisper.cpp -L$(pwd)/../whisper.cpp/build -L$(pwd)/../whisper.cpp/build/src -L$(pwd)/../whisper.cpp/build_go/ggml/src -L$(pwd)/../whisper.cpp/build_go/src"
-        export CGO_CFLAGS="-I$(pwd)/../whisper.cpp -I$(pwd)/../whisper.cpp/include -I$(pwd)/../whisper.cpp/ggml/include"
+        export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$(pwd)/../whisper.cpp/build"
+        export CGO_LDFLAGS="-L$(pwd)/../whisper.cpp/build"
+        export CGO_CFLAGS="-I$(pwd)/../whisper.cpp/include -I$(pwd)/../whisper.cpp/ggml/include"
         if [[ ${UNAME} == *"Darwin"* ]]; then
             export GGML_METAL_PATH_RESOURCES="../whisper.cpp"
             /usr/local/go/bin/go run -tags $GOTAGS -ldflags "-extldflags '-framework Foundation -framework Metal -framework MetalKit'" cmd/experimental/whisper.cpp/main.go
         else
-            /usr/local/go/bin/go run -tags $GOTAGS -ldflags="${GOLDFLAGS}" cmd/experimental/whisper.cpp/main.go
+            /usr/local/go/bin/go run -exec "env LD_LIBRARY_PATH=$(pwd)/../whisper.cpp/build" -tags $GOTAGS -ldflags="${GOLDFLAGS}" cmd/experimental/whisper.cpp/main.go
         fi
     fi
     elif [[ ${STT_SERVICE} == "vosk" ]]; then
